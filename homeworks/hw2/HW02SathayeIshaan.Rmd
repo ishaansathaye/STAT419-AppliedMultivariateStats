@@ -1,0 +1,106 @@
+# Tuesday Exercises
+
+## Question 1
+
+### (a)
+
+```{r}
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+calcium_data <- read.table(file="T3_3_Calcium.DAT", sep="")
+calcium_data
+names(calcium_data) <- c("location","avail","exch","turnip-green-calc")
+calcium_data
+```
+
+### (b)
+
+```{r}
+cov_mat <- cov(calcium_data[,2:4])
+cov_mat
+```
+
+```{r}
+cor_mat <- cor(calcium_data[,2:4])
+cor_mat
+```
+
+```{r}
+mean_vec <- colMeans(calcium_data[,2:4])
+mean_vec
+```
+
+-   Variance of the turnip green calcium level is 0.25. Standard deviation of it is 0.5. Covariance between available and exchangeable is 49.68.
+
+-   They have a linear positive association but not sure due its magnitude being tough to interpret. A better comparison would be the correlation coefficient in the correlation matrix where the value is 0.49. This shows that there is a moderate linear positive association.
+
+-   More strongly associated with exchangeable with a value of 0.86.
+
+### (c)
+
+Make a scatterplot matrix of the 3 variables.
+
+```{r}
+pairs(calcium_data[,2:4])
+```
+
+From this it would seem that between avail and exch there is somewhat weak positive linear association. Between exch and turnip green levels there is a better trend. And with turnip green and avail there is also a weak association between the variables.
+
+### (d)
+
+```{r}
+# scatterplot3d function requires scatterplot3d library. Also add color to the points by what data point they are/
+library(scatterplot3d)
+scatterplot3d(x=calcium_data$avail, y=calcium_data$exch, z=calcium_data$`turnip-green-calc`, color=calcium_data$location)
+
+```
+
+From this 3D graph, its is somewhat hard to tell what patterns exist in the data since they are not grouped by anything meaningful other than location.
+
+### (e)
+
+```{r}
+stars(calcium_data[,2:4], labels=calcium_data$location, key.loc=c(6, 1.8))
+```
+
+-   Location 3 has massive values for all 3 variables: exch, turnip green and avail calcium levels
+
+-   Locations seem to have a lot of avail calcium levels.
+
+## Question 2
+
+### (a)
+
+```{r}
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+probes <- read.table(file="T3_5_Probe.DAT", sep="")
+probes
+names(probes) <- c("subject_no","y1","y2","y3","y4","y5")
+probes
+```
+
+### (b)
+
+Create a parallel coordinates plot of the 5 response times for the 11 subjects.
+
+```{r}
+library(MASS)
+parcoord(probes, col=1:11, lty=1:11, main="Parallel Coordinates Plot of Response Times", var.label=TRUE)
+
+```
+
+There does not seem to be any groupings in the data, which means it looks like it is a random jumble of responses for each of the subjects.
+
+### (c)
+
+Fake grouping variable where first 45 records were for younger adults and last 6 were for older adults.
+
+```{r}
+age <- c(rep(1, 5), rep(2, 6))
+```
+
+Generate a parallel coordinates plot where younger adults are in red and older adults are in blue.
+
+```{r}
+colors <- c("Red", "Blue")
+parcoord(probes, col=colors[age], lty=1:11, main="Parallel Coordinates Plot of Response Times", var.label=TRUE)
+```
