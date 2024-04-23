@@ -1,0 +1,313 @@
+# Tuesday Exercises
+
+## Question 1
+
+```{r}
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+calcium_data <- read.table(file="T3_3_Calcium.DAT", sep="")
+calcium_data
+names(calcium_data) <- c("location","avail","exch","turnip-green-calc")
+calcium_data
+```
+
+### (b)
+
+```{r}
+Sy <- cov(calcium_data[,2:4])
+Sy
+```
+
+```{r}
+meany <- colMeans(calcium_data[,2:4])
+meany
+```
+
+### (c)
+
+Using equation 3.62: $\bar{z} = A\bar{y}$
+
+```{r}
+A <- matrix(c(1,1,1,2,-3,2,-1,-2,-3), nrow=3, ncol=3, byrow=TRUE)
+z_bar <- A %*% meany
+z_bar
+```
+
+Computing the column means of a matrix containing the data of the observed z values:
+
+```{r}
+z <- t(A %*% t(as.matrix(calcium_data[,2:4])))
+z_bar <- t(t(colMeans(z)))
+z_bar
+```
+
+### (d)
+
+Using equation 3.64: $S_z= ASA^{'}$:
+
+```{r}
+s = A %*% Sy %*% t(A)
+s
+```
+
+By directly using the observed z values:
+
+```{r}
+s = cov(z)
+s
+```
+
+## Question 2
+
+### (a)
+
+```{r}
+library(MASS)
+library(scatterplot3d)
+set.seed(548)
+```
+
+### (b)
+
+```{r}
+reactions <- data.frame(mvrnorm(n=80,
+                               mu=c(40, 30, 30),
+                               Sigma=matrix(c(12, 3, 3,
+                                              3, 8, 3,
+                                              3, 3, 9), ncol = 3)))
+names(reactions) <- c("PercConvert", "PercUnchanged", "PercUnwant")
+head(reactions, n=5)
+```
+
+```{r}
+scatterplot3d(reactions$PercConvert, reactions$PercUnchanged, reactions$PercUnwant,
+              xlim=c(0,50), ylim=c(0,50), zlim=c(0,50),
+              main="3D Scatterplot of Simulated Chemical Reactions Data",
+              xlab="Convert", ylab="Unchanged", zlab="Unwanted")
+```
+
+```{r}
+S <- var(reactions)
+S
+```
+
+### (c)
+
+```{r}
+set.seed(368)
+reactions1 <- data.frame(mvrnorm(n=80,
+                               mu=c(40, 30, 30),
+                               Sigma=matrix(c(40, 3, 3,
+                                              3, 30, 3,
+                                              3, 3, 36), ncol = 3)))
+names(reactions1) <- c("PercConvert", "PercUnchanged", "PercUnwant")
+head(reactions1, n=5)
+```
+
+```{r}
+scatterplot3d(reactions1$PercConvert, reactions1$PercUnchanged, reactions1$PercUnwant,
+              xlim=c(0,50), ylim=c(0,50), zlim=c(0,50),
+              main="3D Scatterplot of Simulated Chemical Reactions Data",
+              xlab="Convert", ylab="Unchanged", zlab="Unwanted")
+```
+
+```{r}
+S <- var(reactions1)
+S
+```
+
+### (d)
+
+The two graphs corroborate the generalized variances because each of them shows the distance between data points for each of the variables. The first simulated data had lower variances than the second data which is evident in the spread of the data points difference between the graphs.
+
+### (e)
+
+Comparing the magnitudes of the co-variances between the two simulated data sets, it can be observed that the values in the second data set are generally larger than the first one, per my reflection above. This could indicate that there is a stronger relationship between the variables in the second data set compared to the first one. There does seem to be a strength between pairs of variables such as PercConvert and PercUnwant as the variances are higher. The form overall of the matrix implies the strength and direction of the relationships between the pairs of variables in the data.
+
+### (f)
+
+```{r}
+z <- kde2d(reactions$PercConvert, reactions$PercUnchanged, n=25)
+filled.contour(z, nlevels = 10,
+               xlab="Percent Converted", ylab="Percent Unchanged",
+               main="Chemical Reactions Simulated Dataset 1: Filled Contour")
+```
+
+```{r}
+z <- kde2d(reactions1$PercConvert, reactions1$PercUnchanged, n=25)
+filled.contour(z, nlevels = 10,
+               xlab="Percent Converted", ylab="Percent Unchanged",
+               main="Chemical Reactions Simulated Dataset 1: Filled Contour")
+```
+
+From the contour plots, it seems that the center of the first data is higher than the second one. Also, the lines are much closer in the first plot, while in the second there are much greater gaps between lines. Compared the first data, there are a lot more data points that are concentrated in the center.
+
+### (g)
+
+#### (i)
+
+```{r}
+A <- matrix(c(1,1,1,
+              1,-1,0), nrow=2, ncol=3, byrow=TRUE)
+A
+```
+
+```{r}
+z <- t(A %*% t(as.matrix(reactions1)))
+z <- data.frame(z)
+colnames(z) <- c("total", "diff")
+```
+
+#### (ii)
+
+```{r}
+z_bar <- t(colMeans(z))
+z_bar
+```
+
+These sample means make sense because they are the averages of the total and difference for converted and unchanged percentages of the data points in the z matrix. This means that the average of the total and difference of the data points in the z matrix is 100.6 and 9.4 respectively.
+
+#### (iii)
+
+```{r}
+qqnorm(z$total)
+qqline(z$total)
+```
+
+```{r}
+qqnorm(z$diff)
+qqline(z$diff)
+```
+
+The property of the MV normal distribution that this empirically confirms with the plots would be that each of the variables in z, total and diff follow a uni-variate normal distribution. Marginal normality is another name for this where each variable in the multivariate normal distribution follows a uni-variate normal distribution. So here each of the variables is approximately normally distributed on its own.
+
+# Thursday Exercises
+
+## Problem 1
+
+### (a)
+
+```{r}
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+probes <- read.table(file="T3_5_Probe.DAT", sep="")
+probes
+names(probes) <- c("subject_no","y1","y2","y3","y4","y5")
+probes
+```
+
+```{r}
+pairs(probes[,2:6], main="Scatterplot Matrix for Probe Data")
+
+```
+
+It is quite difficult to see if there any egregious outliers in this data, but just looking at it in general there do seem to be some that deviate from a general pattern. This kind of plot is not perfectly reliable for identifying outliers in this situation. This is because it only provides insights into pairwise relationships between variables since it is limited to bivariate plots and outliers could occur in combinations of 3 or more variables. There is also the sense of subjectivity in this plot when determining and also that these can be influenced by the scale and distribution of the variables.
+
+### (b)
+
+```{r}
+meany <- colMeans(probes[,2:6])
+meany
+```
+
+The individual means of the 5 probe words are 36.09, 25.54, 34.09, 27.27, 30.727.
+
+### (c)
+
+```{r}
+library(DescTools)
+HotellingsT2Test(x=probes[,2:6], y = NULL, mu = c(30, 25, 40, 25, 30), test = "f")
+```
+
+We do not reject the null hypothesis. There is not sufficient evidence to support that the mean response time for the 5 probe word positions is 30, 25, 40, 25, and 30 for the 5 words respectively. This is due to the p value 0.0067 \> 0.001.
+
+### (d)
+
+```{r}
+library(MVN)
+mvn(probes[,-5], univariatePlot="qqplot", mvnTest="mardia")
+```
+
+p-value is trustworthy as the there is not sufficient evidence to reject the null hypothesis that the data is multivariate normal.
+
+### (e)
+
+```{r}
+t.test(x=probes$y1, mu=30)
+t.test(x=probes$y2, mu=25)
+t.test(x=probes$y3, mu=40)
+t.test(x=probes$y4, mu=25)
+t.test(x=probes$y5, mu=30)
+```
+
+From these univariate hypothesis tests it seems that for all of the variables that there is not sufficient evidence to reject the null hypothesis that the true mean is equal to null hypothesized mean. To conclude the means from the null hypothesis from part (b) seem to be in line with the individual means of the 5 probe word response times.
+
+## Problem 2
+
+### (a)
+
+```{r}
+set.seed(132)
+sim <- data.frame(mvrnorm(n=50,
+                               mu=c(100, 100, 100, 100),
+                               Sigma=matrix(c(15^2, 0, 0, 0,
+                                              0, 15^2, 0, 0,
+                                              0, 0, 15^2, 0,
+                                              0, 0, 0, 15^2), ncol = 4)))
+meany <- colMeans(sim)
+meany
+```
+
+My 4 sample means that I got were 102.85, 98.82, 101.70, 101.36.
+
+```{r}
+HotellingsT2Test(x=sim, y = NULL, mu = c(100, 100, 100, 100), test = "f")
+```
+
+The p-value is 0.5482 and the conclusion when testing this null would be that we would not reject the null hypothesis. The hypothesized means would corroborate with the sample means and I am not surprised by this conclusion because the computed means are very close to the hypothesized means.
+
+```{r}
+HotellingsT2Test(x=sim, y = NULL, mu = c(98, 98, 98, 98), test = "f")
+```
+
+The p-value is 0.04 so I would fail to reject the null hypothesis that the mean is equal to 98 for all of the variables. This means that there is not sufficient evidence to support the alternative that the mean is not equal to 98 for all the variables.
+
+```{r}
+HotellingsT2Test(x=sim, y = NULL, mu = c(95, 95, 95, 95), test = "f")
+```
+
+Here also the p-value is \< 0.001 so I reject the null hypothesis that the mean is equal to 95 for all of the variables. This means that there is sufficient evidence to support the alternative that the mean is not equal to 95 for all the variables.
+
+From these 3 tests that we have been asked to perform the take-home message is that when all variables are 50 linearly independent of one another the mean of the sample is very close to the population mean. As it can be seen that when all of them are 100 then the p value is high but when all are reduced then the p value is greatly reduced.
+
+### (b)
+
+```{r}
+set.seed(256)
+sim <- data.frame(mvrnorm(n=10,
+                               mu=c(100, 100, 100, 100),
+                               Sigma=matrix(c(15^2, 0, 0, 0,
+                                              0, 15^2, 0, 0,
+                                              0, 0, 15^2, 0,
+                                              0, 0, 0, 15^2), ncol = 4)))
+HotellingsT2Test(x=sim, y = NULL, mu = c(98, 98, 98, 98), test = "f")
+```
+
+Comparing the results from (a), the p-value 0.07 rather than 0.04 and the conclusion would be the same. The message would probably be that when the sample size is large enough then the mean of the sample is the mean of the population.
+
+### (c)
+
+```{r}
+set.seed(643)
+sim <- data.frame(mvrnorm(n=50,
+                               mu=c(100, 100, 100, 100),
+                               Sigma=matrix(c(20^2, 0, 0, 0,
+                                              0, 20^2, 0, 0,
+                                              0, 0, 20^2, 0,
+                                              0, 0, 0, 20^2), ncol = 4)))
+HotellingsT2Test(x=sim, y = NULL, mu = c(98, 98, 98, 98), test = "f")
+```
+
+Comparing the results from (a), the p-value 0.34 rather than 0.04 and the conclusion would be the same. The message would probably be that the variance of the data is important because the larger the variance the more likely the null hypothesis will be rejected.
+
+### (d)
+
+The ability of the Hotelling’s T\^2-test to detect that observed data deviates from what would be expected if the null hypothesis were true depends on 3 things, namely the sample size, the distance of the observed data from the hypothesized means, and the variance of the data.
