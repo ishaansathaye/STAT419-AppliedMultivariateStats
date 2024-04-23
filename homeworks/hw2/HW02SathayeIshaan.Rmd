@@ -59,7 +59,7 @@ From this 3D graph, its is somewhat hard to tell what patterns exist in the data
 ### (e)
 
 ```{r}
-stars(calcium_data[,2:4], labels=calcium_data$location, key.loc=c(6, 1.8))
+stars(calcium_data[,2:4], draw.segments="T", labels=calcium_data$location, key.loc=c(6, 1.8))
 ```
 
 -   Location 3 has massive values for all 3 variables: exch, turnip green and avail calcium levels
