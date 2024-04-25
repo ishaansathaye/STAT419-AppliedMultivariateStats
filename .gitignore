@@ -49,3 +49,14 @@ po/*~
 rsconnect/
 
 /data
+
+# Latex Generated Files
+*.aux
+*.bbl
+*.blg
+*.log
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+*.DS_Store
