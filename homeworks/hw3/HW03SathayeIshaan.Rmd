@@ -4,7 +4,7 @@
 
 ```{r}
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-calcium_data <- read.table(file="T3_3_Calcium.DAT", sep="")
+calcium_data <- read.table(file = "../../data/T3_3_Calcium.DAT", sep = "")
 calcium_data
 names(calcium_data) <- c("location","avail","exch","turnip-green-calc")
 calcium_data
@@ -188,7 +188,7 @@ The property of the MV normal distribution that this empirically confirms with t
 
 ```{r}
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-probes <- read.table(file="T3_5_Probe.DAT", sep="")
+probes <- read.table(file="../../data/T3_5_Probe.DAT", sep="")
 probes
 names(probes) <- c("subject_no","y1","y2","y3","y4","y5")
 probes

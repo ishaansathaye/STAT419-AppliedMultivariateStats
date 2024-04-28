@@ -3,7 +3,7 @@
 a)  
 
 ```{r}
-reactions <- read.table(file = "T10_1_CHEM.DAT", sep = "")
+reactions <- read.table(file = "../../data/T10_1_CHEM.DAT", sep = "")
 reactions
 ```
 
