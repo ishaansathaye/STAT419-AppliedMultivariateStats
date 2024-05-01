@@ -1,0 +1,221 @@
+# Tuesday Exercises
+
+## Question 1
+
+### (a)
+
+```{r}
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+beetles <- read.table(file="../../data/T5_5_FBeetles.dat",
+                      col.names=c("exptUnit",
+                                  "species","transvDis","elyLen","ant2Len","ant3Len"))
+head(beetles)
+```
+
+### (b)
+
+```{r}
+library(MASS)
+responses <- beetles[,3:6]
+type <- beetles[,2]
+colors <- ifelse(type==1, yes="Red", no="Green")
+parcoord(responses, var.label=T, col = colors,
+         main="Parallel Coordinates Plot of Species of Beetles")
+
+```
+
+Species 1 of the beetles which is the red and Species 2 is the green. From this plot it is clear that the 2 species would have different means for the variables ant3Len and ant2Len as there are clear distinctions between species. However, for the transvDis and elyLen variables, the distinctions are not so clear, which would suggest that there may not be significant differences in those specific variables between the 2 species. In regards to the null hypothesis which is that $\mu_1 = \mu_2$ may be rejected as there are differences between the species in at least some of the variables. However, the $T^2$ test would be able to make a sound conclusion.
+
+```{r}
+stars(responses, len=1, labels=as.character(beetles$species),
+      draw.segments=T, cex=0.5, key.loc=c(11,1.8), 
+      main="Star Plot with Wedges of Beetles Data: Individual Observations")
+
+```
+
+### (c)
+
+Compute and display the means of the 4 variables, by species. Interpret these figures in the context of the hypothesis test to come as well.
+
+```{r}
+library(dplyr)
+means <- beetles |> group_by(species) |> summarize(meanTD=mean(transvDis),
+                                                     meanEL=mean(elyLen), 
+                                                     meanA2=mean(ant2Len),
+                                                     meanA3=mean(ant3Len))
+means
+
+```
+
+If the null hypothesis is true and the multivariate means are equal for the two species, we would expect the means for each variable to be very similar or equal between the two species. However, the means shown here suggest potential differences between the species for some or all of the variables. The mean for each of the variables tend to different by around 23 with specie 2 having means of elyLen, ant2Len, and ant3Len be larger than specie 1. Each row in that table represents $\bar{y_1}$ and $\bar{y_2}$.
+
+### (d)
+
+#### 5.16 Part (a)
+
+```{r}
+library(DescTools) 
+
+responses <- as.matrix(beetles[,3:6])
+HotellingsT2Test(responses ~ type, test="f") 
+```
+
+There is very strong evidence that the mean beetle measurements differ for the 2 beetle specie (p \< 0.0001).
+
+#### 5.16 Part (b)
+
+```{r}
+t.test(beetles$transvDis ~ beetles$species, var=T)
+t.test(beetles$elyLen ~ beetles$species, var=T)
+t.test(beetles$ant2Len ~ beetles$species, var=T)
+t.test(beetles$ant3Len ~ beetles$species, var=T)
+```
+
+Null hypothesis in each of these t tests would be that $\mu_{1i} = \mu_{2i}$ where i = 1,2,3,4 the variables. The p-value in each of the tests resulted in significant results which would mean to reject the null and conclude that there is significant evidence that there is a difference in all of the means between the species.
+
+### (e)
+
+```{r}
+library(MVN)
+
+beetles2 <- beetles[,-1] 
+mvn(data=beetles2, subset="species", mvnTest="mardia", desc=F) 
+```
+
+Multivariate normality assumption checks out from the output and so we no evidence to suggest beetle measurements are not MV normal.
+
+## Question 2
+
+```{r}
+bronchus <- read.table(file="../../data/T5_10_BRONCUS.dat",
+                      col.names=c("y1", "y2","x1","x2"))
+bronchus$diff1 <- bronchus$y1 - bronchus$x1
+bronchus$diff2 <- bronchus$y2 - bronchus$x2
+head(bronchus, n=5)
+tail(bronchus, n=5)
+```
+
+```{r}
+plot(bronchus$diff1, bronchus$diff2,
+     xlim=c(-300,450), ylim=c(-300,450), pch=16, xlab="Survival Time (days) from Date of First Hospital Admission", ylab="Survival Time from Date of Untreatability")
+title(main="Change in Survival Time from First Hospital Admission by Change in Survival Time from Date of Untreatability\nAscorbate - Control", adj=0)
+abline(h=0, v=0, lty=2) 
+
+colMeans(bronchus[,5:6])
+dbar1 <- colMeans(bronchus[,5:6])[1] 
+dbar2 <- colMeans(bronchus[,5:6])[2]
+points(dbar1, dbar2, pch=16, col="red", cex=2)
+
+```
+
+$\bar{d}$ vector contains 49.50 and 106.875 as the mean of the differences for the survival time from date of first hospital admission and the survival time from date of untreatability.
+
+Check if differences are multi-normal:
+
+```{r}
+mvn(data=bronchus[,5:6], subset=NULL, mvnTest="mardia", desc=F)
+```
+
+Check if individual variables are normal:\
+
+```{r}
+mvn(data=bronchus[,1:4], subset=NULL, mvnTest="mardia", desc=F)
+```
+
+```{r}
+HotellingsT2Test(x=bronchus[,5:6], y=NULL, mu=c(0,0), test="f")
+```
+
+$H_0: \mu_d = 0$ (difference vector is equal to 0 vector)
+
+$H_1: \mu_d \neq 0$ (difference vector is not equal to the 0 vector)
+
+```{r}
+t.test(x=bronchus$diff1)
+t.test(x=bronchus$diff2)
+```
+
+#### Summary:
+
+There is fairly strong evidence that the mean change in survival time from date of first hospital admission and survival time from date of untreatability are not both 0 (p = 0.001693). Although the p-value may not be accurate due to differences not being multivariate normal. From the follow up analyses, the survival time from date of untreatability changes between patients who received ascorbate and the control (p = 0.004701). While the survival time from date of first hospital admission does not change (p = 0.2199). This means that from the graph the distance from the y = 0 line to the d-bar vector is significant.
+
+## Question 3
+
+### (a)
+
+The $T^2$ statistic is the Mahalanobis distance between the sample means of the 2 beetle species for the beetle measurements.
+
+### (b)
+
+```{r}
+ybar1 <- colMeans(beetles[beetles$species == 1, -c(1,2)])
+ybar2 <- colMeans(beetles[beetles$species == 2, -c(1,2)])
+ybar1
+ybar2
+```
+
+```{r}
+s1 <- cov(beetles[beetles$species == 1, -c(1,2)])
+s2 <- cov(beetles[beetles$species == 2, -c(1,2)])
+s1
+s2
+```
+
+Get sample sizes of each species:
+
+```{r}
+n1 <- nrow(beetles[beetles$species == 1,])
+n2 <- nrow(beetles[beetles$species == 2,])
+n1
+n2
+```
+
+### (c)
+
+Use the objects you created above to compute the T 2 statistic for the test you did in Exercise #1\
+earlier. For this, you will need to compute a pooled sample covariance matrix, and you will need to\
+invert a matrix.
+
+```{r}
+Sp <- ((n1-1)*s1 + (n2-1)*s2) / (n1+n2-2)
+Sp
+```
+
+```{r}
+T2 <- n1*n2/(n1+n2) * t(ybar1-ybar2) %*% solve(Sp) %*% (ybar1-ybar2)
+T2
+```
+
+$T^2$ = 133.487
+
+### (d)
+
+```{r}
+ybar1
+```
+
+The statistic would decrease since now the distance between the sample means would be smaller. The sample means for the ant3len would now be both closer to each other which would decrease the Mahalanobis distance between the sample means.
+
+```{r}
+dybar1 <- colMeans(beetles[beetles$species == 1, -c(1,2)])
+dybar1[4] <- 209
+dybar1
+T2 <- n1*n2/(n1+n2) * t(dybar1-ybar2) %*% solve(Sp) %*% (dybar1-ybar2)
+T2
+```
+
+$T^2$ = 100.2046 and the change was as expected since it did decrease.
+
+### (e)
+
+The statistic would increase since now the distance between the sample means would be larger. The sample means for the ant3len would now be farther from each other which would increase the Mahalanobis distance between the sample means.
+
+```{r}
+eybar1 <- colMeans(beetles[beetles$species == 1, -c(1,2)])
+eybar1[4] <- 150
+eybar1
+T2 <- n1*n2/(n1+n2) * t(eybar1-ybar2) %*% solve(Sp) %*% (eybar1-ybar2)
+T2
+```
+
+$T^2$ = 309.57 and the change was as expected since it did increase.
