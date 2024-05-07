@@ -1,0 +1,204 @@
+# Tuesday Exercises
+
+## Question 1
+
+-   Data contains weight gains for three groups of rats (Box 1950). The variables are $y_i$ = gain in ith week, i = 1,2,3,4. The groups are 1 = controls, 2 = thyroxin added to drinking water, and 3 = thiouracil added to drinking water.
+
+-   Use R to help do a complete analysis of this data. Be sure to report descriptive statistics, data\
+    visualizations, and statistical modeling results that would be of interest to the researchers of the cited\
+    study. Interpret the aforementioned elements of R output with complete sentences.
+
+-   Weight gains were measured in grams in this study.
+
+-   For any statistical modeling that you do, write out the form of the mathematical/statistical model\
+    using the notation we learned, and tell me what the elements of the model are in the context of this\
+    study.
+
+-   Include in your analysis an estimate of *how much* the average weight gain differs at the end of the\
+    study (week 4) for any groups that do statistically significantly differ at the end of the study.
+
+```{r, message=FALSE}
+library(profileR)
+library(dplyr)
+library(ggplot2)
+library(MASS)
+library(MVN)
+```
+
+```{r}
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+rats <- read.table(file="../../data/T6_25_RAT.DAT",
+                      col.names = c("Rat", "Group", "y1", "y2", "y3", "y4"))
+head(rats, n=5)
+tail(rats, n=5)
+```
+
+### Descriptive Statistics:
+
+```{r}
+wgains <- rats[, 3:6]
+groups <- rats[, 2]
+
+by(wgains, INDICES = groups, FUN = colMeans)
+```
+
+These vectors would be the y-bars or sample mean vectors of each group for their weight gains for the 4 weeks.
+
+```{r}
+by(wgains, INDICES = groups, FUN = cov)
+```
+
+These matrices would be the variance-covariance matrix for each of the groups.
+
+### Data Visualization
+
+```{r}
+colors <- c("red", "green", "blue")
+parcoord(wgains, var.label = T, col = colors[groups], adj=0, 
+         main="Red = Control, Green = Thyroxin Added, Blue = Thiouracil Added")
+```
+
+From this visualization, there seem to be some distinctions for the weight gains in the fourth week. In the fourth week, rats that had thiouracil added to their drinking water had gained less weight overall than the other 2 groups during that week. The mean gain for group 1 and group 2 seem to be the same but group 3 is clearly different. During the first week the average gain in weight for all 3 groups seem to be the same. The average weight gain for group 1 and group 2, which are the control and thyroxin added groups, seem to be the same for the next 3 weeks as well.
+
+```{r}
+stars(wgains, draw.segments = T, labels = groups, len = 1, key.loc = c(8,1.5),
+      main = "Star Plot Labeled By Group Number", adj=0)
+```
+
+From this visualization, it becomes clear that group 3 had less of a weight gain throughout the weeks than the other 2 groups. The weight gain for group 1 was greater most of the time fore week 1 and for group 2 it was week 3 and 4 where the weight gains were greater.
+
+### Test MVN Normality
+
+```{r}
+
+rats.aov <- manova(cbind(y1, y2, y3, y4) ~ as.factor(groups), data=rats)
+mvn(data=rats.aov$residuals, subset=NULL, mvnTest="mardia", desc=F) 
+```
+
+By professor's hint, a test for MVN is done on the residuals since it's the errors that need to follow a MVN distribution. Errors are the residuals in the model, and so the MVN test checks out and the assumptions are not violated.
+
+### One-Way MANOVA
+
+$H_0$: $\mu_{y1} = \mu_{y2} = \mu_{y3} = \mu_{y4}$ (the population mean vectors for the weight gains of rats for the four weeks are the same)
+
+$H_A$: $\mu_{i} \neq \mu_{j}$ for at least one pair of weeks $i \neq j$ (at least 1 pair of population mean vectors for the weight gains of rats for the four weeks are unequal)
+
+```{r}
+rats.summary <- summary(rats.aov, test = "Wilks")
+rats.summary
+```
+
+We have fairly strong evidence that the 3 groups of rats (control, thyroxin added to water, and thiouracil added to water) do not yield the same average weight gains in grams for the four weeks. Therefore the 3 groups do not have the same population mean vectors (p = 0.0002).
+
+### Follow Up: Univariate ANOVA
+
+```{r}
+y1rats.aov <- aov(y1 ~ as.factor(groups), data=rats)
+summary(y1rats.aov)
+```
+
+```{r}
+y2rats.aov <- aov(y2 ~ as.factor(groups), data=rats)
+summary(y2rats.aov)
+```
+
+```{r}
+y3rats.aov <- aov(y3 ~ as.factor(groups), data=rats)
+summary(y3rats.aov)
+```
+
+```{r}
+y4rats.aov <- aov(y4 ~ as.factor(groups), data=rats)
+summary(y4rats.aov)
+```
+
+From the follow up univariate tests, the mean weight gain for the groups in weeks 2-4 are not equal, since there is enough evidence to suggest that the means are different (p = 0.0009, p \< 0.0001, and p \< 0.0001).
+
+### Finding Differing Groups
+
+```{r}
+TukeyHSD(y2rats.aov, conf.level = 1-0.05/3)
+```
+
+```{r}
+TukeyHSD(y3rats.aov, conf.level = 1-0.05/3)
+```
+
+```{r}
+TukeyHSD(y4rats.aov, conf.level = 1-0.05/3)
+```
+
+From this analysis, for the weeks that were statistically significant which are weeks 2-4, groups 1 and 3 and groups 2 and 3 were statistically significant. This is consistent with my earlier observations for the parallel coordinates plot.
+
+At the end of the study (for week 4), means for groups 1 and 3 and groups 3 and 2 statistically significantly differ with p values \< 0.0001 and \< 0.001 respectively. Groups 1 and 3, so the control and thiouracil added groups, differ by 14.7 grams of weight, and Groups 2, the thyroxin added group, and 3 differ by 14.34 grams of weight. Therefore, groups 1 and 3 and groups 2 and 3 had different population mean weight gains at the end of the study, and there is not sufficient evidence to claim that groups 1 and 2 had different population mean weight gains for week 4.
+
+## Thursday Exercise
+
+### Additional Analysis: Various Statistics
+
+```{r}
+rats1.summary <- summary(rats.aov, test = "Wilks")
+rats1.summary
+```
+
+```{r}
+rats3.summary <- summary(rats.aov, test = "Roy")
+rats3.summary
+```
+
+```{r}
+rats4.summary <- summary(rats.aov, test = "Pillai")
+rats4.summary
+```
+
+```{r}
+rats5.summary <- summary(rats.aov, test = "Hotelling-Lawley")
+rats5.summary
+```
+
+All of these various statistics reach the same conclusion that the results are statistically significant, where we have sufficient evidence that the population mean vectors for the weight gains of the rats are not the same for the 4 weeks.
+
+### Additional Analysis: Profile Analysis
+
+```{r}
+ratsLong <- reshape(rats,
+                    direction = "long",
+                    varying = list(c("y1", "y2", "y3", "y4")),
+                    v.names = "weight",
+                    idvar = c("Rat", "Group"),
+                    timevar = "week",
+                    times = c(1, 2, 3, 4))
+
+meanWts <- ratsLong |>
+  group_by(Group, week) |>
+  summarize(meanWeight = mean(weight), .groups = "keep")
+
+meanWts$group <- as.factor(meanWts$Group)
+
+ggplot(meanWts, aes(x = week, y = meanWeight, color = group)) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Mean Weight Gains by Week and Group",
+       x = "Week",
+       y = "Mean Weight Gain (g)") +
+  theme_minimal()
+
+
+```
+
+In terms of the 3 profile analysis hypotheses:
+
+$H_{01}$: the *3* profiles are parallel (slope from variable to variable is the same across groups)
+
+$H_{02}$: the *3* profiles are at the same level (average of the mean weight vectors elements are equal across groups)
+
+$H_{03}$: the *3* profiles are flat (4 variables averages across groups are the same
+
+this data will not support any of the hypotheses since from the graph it seems the profiles are not parallel, at the same level, or flat.
+
+```{r}
+rats.prof <- pbg(data=rats[,-c(1,2)], group=rats$Group)
+summary(rats.prof)
+```
+
+From the parallel analysis, there is fairly strong evidence that the mean weight gains change at different rate depending on the group (p = 0.004). From the equal levels analysis results, there is strong evidence that the average of the mean weight gains are not the same across the groups (p \< 0.0001). From the flatness analysis results, there is strong evidence that the mean weight gains do change regardless of the group (p \< 0.001). The results from the analysis corroborate with my observations from the graph.
