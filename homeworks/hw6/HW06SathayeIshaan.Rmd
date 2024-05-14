@@ -1,0 +1,158 @@
+# Homework 6: Tuesday Exercises
+
+Ishaan Sathaye
+
+## Question 1
+
+Recall the data of textbook exercise #6.40, which you analyzed in the previous homework assignment.\
+Check one of the model assumptions that we did not have the tools for last time, but that you now do\
+possess!
+
+```{r, message=FALSE}
+library(MVTests)
+library(psych)
+library(MVN)
+```
+
+```{r}
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+rats <- read.table(file="../../data/T6_25_RAT.DAT",
+                      col.names = c("Rat", "Group", "y1", "y2", "y3", "y4"))
+head(rats, n=5)
+tail(rats, n=5)
+```
+
+**Testing the Equality of Several Population Covariance Matrices**
+
+```{r}
+wgains <- rats[, 3:6]
+groups <- rats[, 2]
+
+S <- by(wgains, INDICES = groups, FUN = cov)
+S
+```
+
+We will see how different the covariance matrix is from the pooled covariance matrix:
+
+```{r}
+Spl <- ((nrow(rats[rats$Group == 1,]) - 1) * S[[1]] + (nrow(rats[rats$Group == 2,]) - 1) * S[[2]] + (nrow(rats[rats$Group == 3,]) - 1) * S[[3]]) / (nrow(rats) - 3)
+Spl
+```
+
+$H_0$: $\Sigma_1 = \Sigma_2 = \Sigma_3 = \Sigma$
+
+$H_A$: All population (groups) do not have the same covariance matrix.
+
+```{r}
+BoxM(wgains, group = groups)
+```
+
+From the Box's M-test, the Chi squared test statistic is not that far away from the expected value of the test statistic if the null were true (20). There is a 84.07% change of getting 13.7 or bigger. Therefore, we fail to reject the null and conclude that there is not significant evidence to suggest that the population covariance matrices, in this case for the groups of rats, differ (p = 0.84).
+
+## Question 2
+
+### #7.14
+
+In Example 5.2.2, we assumed that for the height and weight data of Table 3.1, the population covariance matrix is,
+
+$\Sigma = \begin{bmatrix}20 & 100\\ 100 & 1000\end{bmatrix}$
+
+Test this as a hypothesis using (7.2).
+
+```{r}
+hwt <- read.table(file="../../data/T3_1_HEIGHTWT.DAT",
+                      col.names = c("Person", "Height", "Weight"))
+head(hwt, n=5)
+tail(hwt, n=5)
+```
+
+$H_0$: $\Sigma = \Sigma_0 = \begin{bmatrix}20 & 100\\ 100 & 1000\end{bmatrix}$
+
+$H_A$: $\Sigma \neq \Sigma_0 = \begin{bmatrix}20 & 100\\ 100 & 1000\end{bmatrix}$
+
+```{r}
+hwt_data <- hwt[,-1]
+sigma0 <- matrix(c(20, 100, 100, 1000), byrow=T, ncol=2)
+sigma0
+
+S <- cov(hwt_data)
+S
+```
+
+```{r}
+det(S)
+det(sigma0)
+```
+
+```{r}
+n <- nrow(hwt_data)
+p <- ncol(hwt_data)
+c(n, p)
+```
+
+```{r}
+u <- (n-1)*(log(det(sigma0)) - log(det(S)) + tr(S %*% solve(sigma0)) - p)
+u
+```
+
+```{r}
+udf <- (1/2)*p*(p+1)
+udf
+```
+
+```{r}
+1-pchisq(u, df=udf)
+```
+
+```{r}
+mvn(data=hwt_data, subset=NULL, mvnTest="mardia", desc=F)
+```
+
+From this analysis at a significance level of 0.05, we reject the null that the population covariance matrix is equal to sigma0. If the null were true we would expect u to be roughly 0 or around the expected value of 3, which is its degrees of freedom. There is fairly strong evidence to conclude that the population covariance matrix is not equal to $\begin{bmatrix}20 & 100\\ 100 & 1000\end{bmatrix}$ (p = 0.0112). This test statistic and p value is appropriate since our data follows a MV Normal distribution as given by the Marida Test conducted above.
+
+### #7.32
+
+Test the independence of all the variables for the calcium data of Table 3.4.
+
+```{r}
+calc <- read.table(file="../../data/T3_3_CALCIUM.DAT",
+                      col.names = c("location_no", "avail", "exch", "turnip_green"))
+head(calc, n=5)
+tail(calc, n=5)
+```
+
+$H_0$: $P_{\rho} = I$
+
+$H_A$: $P_{\rho} \neq I$
+
+where $P_{\rho}$ is the population correlation matrix and $I$ is the identity matrix.
+
+```{r}
+calc_data <- calc[,-1]
+mvn(data=calc_data, subset=NULL, mvnTest="mardia", desc=F)
+```
+
+The data follows a MV normal distribution due to the Mardia Test above. This means the statistic that we will calculate will follow a $X^2$ distribution with the degrees of freedom equal to 1/2\*p\*(p-1).
+
+```{r}
+R <- cor(calc_data)
+R
+```
+
+```{r}
+n <- nrow(calc_data)
+p <- ncol(calc_data)
+chidf <- (1/2)*p*(p-1)
+chidf
+```
+
+```{r}
+chiStat <- -((n-1) - 1/6*(2*p + 5))*log(det(R))
+chiStat
+```
+
+```{r}
+1-pchisq(chiStat, df=chidf)
+```
+
+Since the test statistic is large and the p value is small, we reject the null hypothesis that the population correlation matrix is equal to the identity matrix. We have sufficient evidence that at least 2 of the variables are not independent of each other (p \< 0.01).
