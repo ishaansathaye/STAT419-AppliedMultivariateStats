@@ -1,0 +1,374 @@
+# Homework 7: Tuesday Exercises
+
+Ishaan Sathaye
+
+## Question 1
+
+Use the context and data of textbook exercise #8.9, but ignore the textbook's instructions. Instead, conduct a discriminant analysis, applying graphical and statistical techniques that we have learned in class.
+
+```{r, message=FALSE}
+library(MVN)
+library(GGally)
+library(MASS)
+library(dplyr)
+library(caret)
+```
+
+**Data:**
+
+```{r}
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+musc <- read.table(file="../../data/T5_7_MUSCDYS.DAT",
+                   col.names = c("group", "age", "month", "creatine", "hemo", "lactate",
+                                 "pyruvate"))
+musc$group <- as.factor(musc$group)
+head(musc, n=5)
+tail(musc, n=5)
+```
+
+where y1 = age, y2 = month in which measurements were taken, y3 = creatine kinase, y4 = hemopexim, y5 = lactate dehydrogenase, y6 = pyruvate kinase.
+
+The groups are 1 being the noncarriers and 2 being the carriers.
+
+**Graphical Analysis:**
+
+```{r}
+musc |> 
+  group_by(group) |>
+  summarise(meanAge = mean(age),
+            meanMonth = mean(month),
+            meanCreatine = mean(creatine),
+            meanHemo = mean(hemo),
+            meanLactate = mean(lactate),
+            meanPyruvate = mean(pyruvate))
+```
+
+Taking a look at the sample means, it seems that the means for creatine, hemo, lactate, and pyruvate are different for the carriers and non-carriers, which could hint at their usefulness in separation.
+
+```{r}
+ggpairs(musc[,-1], mapping = aes(colour=musc$group), title = "Bivariate Analysis of Variables")
+```
+
+From this scatterplot matrix, the variables which seem to be helpful in a discriminant analysis could be hemopexim, pyruvate, and lactate as these variables have some degree of data separation in terms of the groups of carriers and non-carriers.
+
+**Linear Discriminant Analysis:**
+
+```{r}
+muscLDA <- lda(group ~ ., data=musc)
+muscLDA
+```
+
+```{r}
+musczvalues <- predict(muscLDA)
+muscLDA <- cbind(musc, musczvalues$x)
+head(muscLDA)
+```
+
+```{r}
+means <- muscLDA |>
+  group_by(group) |>
+  summarise(meanz=mean(LD1))
+means
+```
+
+From this analysis, we can get the coefficients of the only 1 discriminant function. The mean of the z scores of the discriminant function show how far they can be pushed as far as possible from each other. However, we can not make any conclusions about these variables, since the data was not standardized.
+
+**Standardized Coefficients:**
+
+```{r}
+muscStd <- scale(musc[,-1])
+muscStd <- data.frame(group = musc$group, muscStd)
+head(muscStd)
+```
+
+```{r}
+muscStdLDA <- lda(group ~ ., data=muscStd)
+muscStdLDA
+```
+
+From this output, the most important variables that contribute to separation are pyruvate, hemopexim, and age, with creatine also being somewhat important and these are in the order of their magnitude of their coefficients. Furthermore, we can test whether certain variables contribute significantly towards the separation of group means, after controlling for the separation attributable to all other variables.
+
+```{r}
+mvn(data = musc, subset = "group", mvnTest = "mardia")
+```
+
+Our data is multivariate normal by the mardia test above, since the assumption is not violated by failing to reject the null hypothesis with a large p-value.
+
+```{r}
+muscmanova <- manova(as.matrix(musc[,-1]) ~ musc$group)
+summary(muscmanova, test="Wilks")
+```
+
+From this output, we can see that the discriminant function provides a dimension of separation (p \< 0.0001), so we can now conduct significance test on the variables to see which one contributes the most to the separation.
+
+**Statistical Significance of Variables:**
+
+```{r}
+# partial.f() function from Professor Lund, credited to Dr. Jimmy Doi
+partial.F <- function(Y, group){
+  Y <- data.matrix(Y)
+  group <- as.factor(group)
+  p <- ncol(Y)
+  m1 <- manova(Y ~ group)
+  nu.e <- m1$df
+  nu.h <- m1$rank-1
+  Lambda.p <- summary(m1,test="Wilks")$stats[3]
+  Lambda.p1 <- numeric(p)
+  for(i in 1:p){
+    dat <- data.matrix(Y[,-i])
+    m2 <- manova(dat ~ group)
+    Lambda.p1[i] <- summary(m2,test="Wilks")$stats[3]
+  }
+  Lambda <- Lambda.p / Lambda.p1
+  F.stat <- ((1 - Lambda) / Lambda) * ((nu.e - p + 1)/nu.h)
+  p.val <- 1 - pf(F.stat, nu.h, nu.e - p + 1)
+  out <- cbind(Lambda, F.stat, p.value = p.val)
+  dimnames(out)[[1]] <- dimnames(Y)[[2]]
+  ord <- rev(order(out[,2]))
+  return(out[ord,])
+}
+```
+
+```{r}
+partial.F(Y=musc[,-1], group=musc$group)
+```
+
+Using a Bonferroni Correction of 0.05/6 = 0.0083, the statistically significant variables in their contribution to distinguishing between non-carriers and carriers are pyruvate (p = 0.003), hemo (p = 0.004), and age (p = 0.005), which is the same analysis made from the linear discriminant analysis.
+
+## Question 2
+
+### #8.11
+
+#### (a)
+
+**Find the eigenvectors of** $E^{-1}H$**.**
+
+```{r}
+fish <- read.table(file="../../data/T6_17_FISH.DAT",
+                   col.names = c("method", "aroma", "flavor", "texture", "moisture"),
+                   comment.char = "\032")
+fish$method <- as.factor(fish$method)
+head(fish, n=5)
+tail(fish, n=5)
+
+```
+
+where each entry is an average score for the judges on that fish.
+
+```{r}
+fishmanova <- manova(as.matrix(fish[,-1]) ~ fish$method)
+fishsummary <- summary(fishmanova, test="Wilks")
+```
+
+```{r}
+H <- fishsummary$SS[[1]]
+E <- fishsummary$SS[[2]]
+eigenvectors <- eigen(solve(E)%*%H)$vectors
+eigenvectors
+```
+
+k = 3, p = 4
+
+s = min(3-1, 4) = 2 eigenvectors
+
+$\lambda_1 = \begin{bmatrix}-0.03181703 \\ -0.81967777 \\ 0.53294806 \\ 0.20756299\end{bmatrix}$
+
+$\lambda_1 = \begin{bmatrix}-0.63526646 \\ 0.59729861 \\ 0.48673081 \\ -0.05257385\end{bmatrix}$
+
+#### (b)
+
+**Carry out tests of significance for the discriminant functions and find the relative importance of each as in (8.13). Do these two procedures agree as to the number of important discriminant functions?**
+
+```{r}
+eigenvalues <- eigen(solve(E)%*%H)$values[1:2]
+eigenvalues
+```
+
+```{r}
+fishLDA <- lda(method ~ ., data = fish)
+fishLDA
+```
+
+```{r}
+# m = 1
+m <- 1
+s <- 2
+lambdam <- prod(1/(1+eigenvalues[m:s]))
+
+N <- nrow(fish)
+p <- 4
+k <- 3
+vm <- -(N-1-1/2*(p+k)) * log(lambdam)
+vm
+
+chidf <- (p-m+1)*(k-m)
+chidf
+
+1-pchisq(vm, df=chidf)
+```
+
+Very significant dimension of separation for the first discriminant function (p \< 0.001).
+
+```{r}
+# m = 2
+m <- 2
+s <- 2
+lambdam <- prod(1/(1+eigenvalues[m:s]))
+
+N <- nrow(fish)
+p <- 4
+k <- 3
+vm <- -(N-1-1/2*(p+k)) * log(lambdam)
+vm
+
+chidf <- (p-m+1)*(k-m)
+chidf
+
+1-pchisq(vm, df=chidf)
+```
+
+Not significant dimension of separation provided by the second discriminant function with a high p-value of 0.286.
+
+```{r}
+# m = 1 function
+var1 <- eigenvalues[1]/(eigenvalues[1] + eigenvalues[2])
+var1
+
+# m = 2 function
+var2 <- eigenvalues[2]/(eigenvalues[1] + eigenvalues[2])
+var2
+```
+
+The relative importance of each discriminant function is 0.9586 for the first one and 0.0414 for the second one. This means that the first function retains 95% of variability between groups while the second one retains only 4% of variability. These procedures agree as to the number of important discriminant functions which is 2 in this case which the first one being the more important.
+
+#### (c)
+
+**Find the standardized coefficients and comment on the contribution of the variables to separation of groups.**
+
+```{r}
+fishStd <- scale(fish[,-1])
+fishStd <- data.frame(method = fish$method, fishStd)
+head(fishStd)
+```
+
+```{r}
+fishStdLDA <-lda(method ~ ., data = fishStd)
+fishStdLDA
+```
+
+The coefficients of the 4 variables aroma, flavor, texture, and moisture for the first discriminant function are 0.076, 1.89, -1.26, and -0.44 respectively. For the second discriminant function the coefficients are -1.17, 1.05, 0.88, and -0.086 respectively. From this analysis, it seems that flavor, texture, moisture and then finally aroma in that order contribute the greatest to the separation from the first discriminant function while aroma and flavor contribute the greatest to separation from the second discriminant function. But we will focus on the first discriminant function as it has more importance.
+
+#### (d)
+
+**Find the partial F for each variable, as in (8.28). Do they rank the variables in the same order as the standardized coefficients for the first discriminant function?**
+
+```{r}
+partial.F(Y=fish[,-1], group=fish$method)
+```
+
+Yes, the ranking of the variables are in the same order as the standardized coefficients for the first discriminant function.
+
+#### (e)
+
+**Plot the first two discriminant functions for each observation and for the mean vectors.**
+
+```{r}
+fishzvalues <- predict(fishLDA)
+fishLDA <- cbind(fish, fishzvalues$x)
+```
+
+```{r}
+means <- fishLDA |>
+  group_by(method) |>
+  summarise(meanz1=mean(LD1),
+            meanz2=mean(LD2))
+
+ggplot() +
+  geom_point(data=fishLDA, mapping=aes(x=LD1, y=LD2, color=method, shape=method), cex=2) +
+    geom_point(data=means, mapping=aes(x=meanz1, y=meanz2), cex=5, pch=as.character(means$method)) +
+      labs(title="Fish Data: Discriminant Functions by Cooking Method")
+  
+```
+
+From this graph, it seems that the first discriminant function is pretty good at separating the third cooking method from the first and second method. This can be seen from the mean vector is as far as possible from the first 2 methods' mean vectors. However the second discriminant function is not good at separating the first method from the second method as there are overlaps.
+
+# Homework 7: Thursday Exercises
+
+## Question 1
+
+Do a classification analysis on the fish/cooking method data, Table 6.17, the same data you used on Tuesday's homework.
+
+### (a)
+
+Use both Fisher's procedure and the quadratic classification procedure to arrive at classification models for the fish data.
+
+Fisher's Procedure:
+
+```{r}
+fish2LDA <- lda(method ~ ., data = fish)
+fish2LDA
+```
+
+```{r}
+classFish <- predict(fish2LDA)$class
+fishFisher <- cbind(fish, classFish)
+fishFisher <- fishFisher[, c("method", "classFish", "aroma", "flavor", "texture", "moisture")]
+head(fishFisher, n=5)
+tail(fishFisher, n=5)
+```
+
+Quadratic Classification Function Procedure:
+
+```{r}
+fishQDA <- qda(method ~ ., data = fish)
+fishQDA
+```
+
+```{r}
+classQuad <- predict(fishQDA)$class
+fishQuad <- cbind(fish, classQuad)
+fishQuad <- fishQuad[, c("method", "classQuad", "aroma", "flavor", "texture", "moisture")]
+head(fishQuad, n=5)
+tail(fishQuad, n=5)
+```
+
+### (b)
+
+Compare the performance of the two procedures in an honest, less biased way.
+
+```{r}
+confusionMatrix(data = fishFisher$classFish, reference = fishFisher$method)
+confusionMatrix(data = fishQuad$classQuad, reference = fishQuad$method)
+```
+
+From this analysis of confusion matrices for the Fisher procedure and quadratic classification function, we used estimates of accuracy/misclassification rates, sensitivity, and specificity to determine the performance of the 2 procedures. Fisher’s procedure resulted in a 75% accuracy or 25% misclassification rate, however the QDA function resulted in a better accuracy of 80.56% which means a 19.4% misclassification rate. This means that the QDA function did a better job at correctly classifying observations than Fisher’s procedure. The sensitivity for Fisher’s was 75%, 58%, and 91.67% respectively for the 3 methods, while for the QDA it was 83%, 66%, and 91.67%. These 2 procedures were more sensitive towards cooking method #3. QDA was more sensitive in classifying methods 1 and 2 as those methods than Fisher’s procedure. The specificity values for Fisher’s procedure are 87.5%, 83%, and 91.67%, while for QDA they were 91.67%, 87.5%, and 91.67%. This means that QDA was much better at classifying records not of a given method that were not classified as that method. Overall, it would seem that QDA did better than Fisher’s procedure.
+
+### (c)
+
+Suppose you were presented with a fish that had the following characteristics, but you didn't know how it was prepared: Aroma = 4.5, Flavor = 5.2, Texture = 4.8, Moisture = 5.1.
+
+-   Predict the preparation method of that dish.
+
+```{r}
+newy <- data.frame(aroma=4.5, flavor=5.2, texture=4.8, moisture=5.1)
+newz <- predict(fishQDA, newdata = newy)
+newz
+```
+
+The preparation method of that dish with those characteristics is method #1.
+
+-   What do you think is the chance you've predicted the method correctly?
+
+```{r}
+confusionMatrix(data = fishQuad$classQuad, reference = fishQuad$method)$overall["Accuracy"]
+```
+
+The chance that I have predicted the method correctly would be the accuracy of the procedure which is 80.56%, which means that across all predictions our model correctly identifies the method 80.56% of the time.
+
+-   Suppose this dish was prepared by the method that your classification model predicted. What is the chance that your classification model would predict the correct cooking method?
+
+```{r}
+confusionMatrix(data = fishQuad$classQuad, reference = fishQuad$method)$byClass[1]
+```
+
+The chance that my classification model would predict the correct cooking method given that it was prepared by the method that my classification model predicted (method #1) would be the sensitivity of the model towards method #1. That value is 83.33%.
