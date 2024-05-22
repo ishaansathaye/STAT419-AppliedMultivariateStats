@@ -1,0 +1,176 @@
+\documentclass[9pt]{extarticle}
+
+\usepackage{color,fancyhdr,ifthen,amssymb,amsfonts,amsmath}
+\usepackage{geometry}
+\usepackage{lipsum}
+\usepackage{enumitem}
+
+\geometry{
+    top=0.55in,
+    bottom=0in,
+    left=0.1in,
+    right=0.1in,
+}
+
+\setlist{nolistsep} %\itemsep0em in itemize
+
+\pagestyle{fancy}
+\fancyhf{} % Clear header and footer
+% \renewcommand{\headrulewidth}{0pt} % Remove header rule
+\renewcommand{\footrulewidth}{0pt} % Remove footer rule
+\linespread{1.2} % Adjust the line spacing here
+\setlength{\headsep}{0.05in} % Adjust the space between header and text
+\setlength{\footskip}{0.1in} % Adjust the space between text and footer
+\parindent=0in
+\flushbottom % Ensure text is aligned with both top and bottom margins
+
+\newcommand{\head}[3]{\lhead{#1}\chead{#2}\rhead{\ifthenelse{\isodd{
+    \thepage}}{Ishaan Sathaye
+ {\hspace{.01in}}}{}}}
+
+\head{Midterm Exam Cheat Sheet}{STAT 419}
+
+\begin{document}
+ 
+\textit{Handout 1:} \textbf{Symmetric Matrices:} rows and columns are 
+interchangeable. $A = A^T$. 
+\textbf{Diagonal Matrix:} all off-diagonal elements are zero \texttt{diag()} 
+func in R. 
+\textbf{0 and I Matrices:} $AI = IA = A$.
+\textbf{Equal Matrices:} same dimensions and corresponding elements are equal.
+\textbf{Matrix Multiplication:} $AB \neq BA$ in general; inner dimensions must
+match.
+\textbf{Distributive Property:} $A(B + C) = AB + AC$.
+\textbf{Transpose of Products:} $(AB)^T = B^TA^T$.\\
+
+\textit{Handout 2:}
+\textbf{Sum of elements:} $\sum_{i=1}^n a_i = j^Ta$ where $j$ is a vector of 1s.
+\textbf{Sum of squares:} $\sum_{i=1}^n a_i^2 = a^Ta$ also called the dot
+product of $a$ and $a^T$.
+\textbf{Length of 2-dim vector:} $\sqrt{a^Ta}$.
+\textbf{Quadratic Form:} $y^TAy$ where $A$ is symmetric matrix and $y$ is a nx1
+vector and this returns a scalar.
+\textbf{Linearly Dependent:} $c_1v_1 + \ldots + c_nv_n = 0$ where $c_i$ 
+are not all zero.
+\textbf{Rank:} number of linearly independent columns/rows; $\leq$ min(n,p);
+= min(n,p) if full rank; get to row-echelon form and count pivot rows for rank.
+\textbf{Non-singular: square matrix with full rank; less than full rank is
+singular; non-singularity = inverse.}
+\textbf{Inverse:} $A^{-1}A = AA^{-1}= I$; $(AB)^{-1} = B^{-1}A^{-1}$; $(A^T)^
+{-1} = (A^{-1})^T$.
+\textbf{Positive Definite Matrix:} $x^TAx > 0$, $A = T^TT$ then T is square root
+matrix of A; PDM is also full ranks and has an inverse; $[x1 x2]A[x1 x2]^T > 0$ 
+where A is \texttt{c(2, 0, 2, 0), ncol=2, nrow=2}.
+\textbf{Determinant:} Scalar; \texttt{det()} or $|A|$; \textbf{computed for 
+var/cov  matrix} which is always square, symmetric, and PDM; diagonal 
+elements $s_i^2$ and off-diagonal elements $s_{ij}$; $|A| = ad - bc$ for
+\texttt{c(a, b, c, d)}; for 3x3 matrix $|A| = a(ei - fh) - b(di - fg) + 
+c(dh - eg)$.
+\textbf{Props of Det:} A is diagonal then $|A| = \prod_{i=1}^n a_{ii}$ (product
+of diagonals); singular then det = 0; non-singular then det $\neq$ 0 \textbf{has
+an inverse}; PDM then
+det $>$ 0;
+\textbf{Trace:} sum of diagonal elements for square matrix.
+\textbf{Orthogonal Matrix:} dot product = 0; correlation coeff. r = 0 if 
+Orthogonal and linearly independent; numerator of Pearson should be 0, so 
+$x_c^Ty_c^T = 0$;
+\textbf{Normalizing a vector:} $x_c = x/\sqrt{x^Tx}$.
+\textbf{Orthogonal Matrix Properties:} matrix A is orthogonal matrix if it is 
+a square matrix with orthonormal (unit length) rows and columns; $A^TA = AA^T 
+= I$ which means $A^T = A^{-1}$;
+\textbf{Eigenvalues and Eigenvectors:} $Ax = \lambda x$, where A defines a 
+transformation and x is not affected by it; A is nxn then n distinct 
+eigenvalues; solve $|A - \lambda I| = 0$; Got eigenvalues, plug in and solve 
+for x, to make it length 1 divide by $\sqrt{2}$;
+\textbf{Eigen Properties:} eigenvalues of a PDM are all positive; eigenvectors 
+of a symmetric matrix are all orthogonal: $x_i^Tx_j = 0$ for $i \neq j$; 
+trace(A) = sum of eigenvalues; det(A) = product of eigenvalues; present 
+eigenvalues \textbf{in descending order}.\\
+
+\textit{Handout 3:}
+\textbf{Sample Mean Vector:} \texttt{colMeans()}; estimate of the population 
+mean vector.
+\textbf{Sample Variance:} $s^2 = \frac{1}{n-1} \sum_{i=1}^n (x_i - \bar{x})$ so 
+the distance from average, on average; \texttt{cov()} for var/cov matrix.
+\textbf{Population Variance:} $\sigma^2 = E[(y - \mu)^2]$.
+\textbf{Covariance:} $s_jk = \frac{1}{n-1} \sum_{i=1}^n (y_{j} - \bar{y}_j)
+(y_{k} - \bar{y}_k)$; large \& positive strong, linear positive association; 
+lose to 0 is a weak linear assoc.
+\textbf{Correlation Coeff and Corr Matrix:} corr coeff is a scaled covariance so 
+it is more interpretable; sample corr coeff: $r_{jk} = \frac{s_{jk}}{
+    \sqrt{s_{jj}}\sqrt{s_{kk}}}$ and same for population; \texttt{cor()} for
+correlation matrix, has 1 on diagonal, $\rho_{jk} = \rho_{kj}$, \textbf{between
+-1 and 1 and no units};\\
+
+\textit{Handout 4:}
+\textbf{Linear Combination:} $z = c_1x_1 + c_2x_2$; $z = c^Tx$; 
+\textbf{Sample Mean :} Vector of z: $\bar{z} = c^T\bar{x}$. 
+\textbf{Interpretation:} sample overall grade $\bar{z}$ across the n students 
+is the linear combination of the sample means of the various different 
+components.
+\textbf{Population Mean:} $E(z) = c^T\mu$.
+\textbf{Variance:} $Var(z) = c_1^2var(x_1) + c_2^2var(x_2) + 2c_1c_2 
+cov(x_1, x_2)$; $s_z^2$ for sample.
+\textbf{Interpretation:} variance of sum of 2 random vars must take into 
+account cov between all pairs of random vars: var(x1 + x2) = formula above.
+\textbf{Sample Variance:} $s_z^2 = A^TSA$ where S is the var/cov matrix.
+\textbf{Population Variance:} $\sigma_z^2 = c^T\Sigma c$.
+\textbf{Several Linear Combinations:} $Z = CX$; $E(Z) = C\mu$; $Var(Z) =
+C\Sigma C^T$; $z = Ay$ and same equations as above.
+\textbf{Partitioning:} sample covariance matrix has transpose of each other 
+within the partitioned matrix.
+\textbf{Number of Elements:} $\frac{n(n+1)}{2}$ unique elements in a 
+cov or corr matrix of n variables.
+\textbf{Covariance Matrix Properties:} $|S|$ is product of eigenvalues of S, 
+$|S| = 0$ if any eigenvalue is 0 (multi co-linearity).
+\textbf{Mahalanobis distance:} multivariate version of a z-score;
+$\delta^2 = (y_i - \mu)^T\Sigma^{-1}(y_i - \mu)$ is in quadratic form and 
+return s a scalar; \textbf{variables that have a high degree of variation
+will contribute less to the overall Mahalanobis distance}; how far a 
+measurement is from the mean vector relative to what a typical deviation from 
+the mean is.
+\textbf{Multivariate Normal Distribution:} $f(y) = \frac{1}{(2\pi)^{p/2}|
+\Sigma|^{1/2}}exp(-\frac{1}{2}(y - \mu)^T\Sigma^{-1}(y - \mu))$; 
+$y \sim N_p(\mu, \Sigma)$; returned value should be a scalar.
+\textbf{Properties of Multivariate Normal:} y is $N_p(y_i, \Sigma)$; 
+$z \sim N(a^T\mu, a^T\Sigma a)$ and individual y's must be normal too; 
+rank(A) = q $\leq$ p then $z \sim N_q(A\mu, A^T\Sigma A)$; if $\mu = 0$ and 
+$\Sigma = I$ then $Ay \sim N(0, I)$.
+\textbf{Independent Random Variables:} $y_j$ and $y_k$ are independent if
+and only if covariance $s_{jk} = 0$ or stated in terms of correlation of row jk;
+\textbf{Implication goes both ways since property of MV normal distribution.} \\
+
+\textit{Handout 5:}
+\textbf{Disprove p vars are jointly MV normally distributed is to show that 
+at least 1 y is not uni-variate normal.}; using qq-plot or rigorous tests; null
+hypothesis of these tests is that variables do follow a MV normal distribution.
+\textbf{Univariate CLT:} Typically $\bar{y}$ is within $\frac{\sigma}{\sqrt{n}}$ 
+of $\mu$ and follows a normal distribution.
+\textbf{Multivariate CLT:} $\bar{y} \sim N_p(\mu, \frac{\Sigma}{n})$ for a large 
+enough sample size $n$.
+\textbf{Sample Variance and Cov Matrix Distribution:} univariate follows a 
+chi-squared distribution; sample var/cov matrix follows a Wishart distribution:
+$(n-1)S \sim Wishart(n-1, \Sigma)$ if y follows a MV normal distribution.
+\textbf{Univariate 1-Sample T Test:} $t = \frac{\bar{y} - \mu_0}{s/\sqrt{n}}$ 
+nominator is how far $\bar{y}$ is from the hypothesized pop mean if $H_0$ were 
+true; denominator is relative to a typical deviation of $\bar{y}$ from $\mu$.
+\textbf{Hotelling's 1-Sample $T^2$ Test:} $T^2 = n(\bar{y} - \mu_0)^TS^{-1}
+(\bar{y} - \mu_0)$; measures how far observed $\bar{y}$ is from its expected
+value, if the null were true, while taking into account the variance/cov of the 
+sample mean vector.
+\textbf{Hotelling's $T^2$ Density:} no upper bound; reject when $T^2$ is large.
+\textbf{P-value accuracy:} data values must have been sampled from MV normal 
+dist, S must be non-singular, and n $>$ p (observations $>$ variables).
+\textbf{Steps to Take After Rejecting Null:} check multivariate normality of 
+data, conduct univariate tests on each variable.
+\textbf{Benefits of MV Tests:} using p univariate tests inflates the type I
+error rate (rejecting null when it is true); p = 4 and $\alpha = 0.05$ then
+$1 - (1 - 0.05)^4 = 0.19$ probability and quickly increases with p; does not
+ignore correlation structure between p vars; more power (prob of rejecting 
+null when null is true) and high power is good; small deviations may be
+statistically significant when combined.
+\textbf{Limitations of MV Tests:} interpretations difficult without univariate
+tests when statistically significant MV test; \textbf{non-directional} so
+null hypothesis for MV is 2-tailed.
+
+\end{document}
