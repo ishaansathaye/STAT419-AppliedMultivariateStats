@@ -121,7 +121,7 @@ C\Sigma C^T$; $z = Ay$ and same equations as above.
 within the partitioned matrix.
 \textbf{Number of Elements:} $\frac{n(n+1)}{2}$ unique elements in a 
 cov or corr matrix of n variables.
-\textbf{Covariance Matrix Properties:} $|S|$ is product of eigenvalues of S, 
+\textbf{Generalized Sample Variance:} $|S|$ is product of eigenvalues of S,  
 $|S| = 0$ if any eigenvalue is 0 (multi co-linearity).
 \textbf{Mahalanobis distance:} multivariate version of a z-score;
 $\delta^2 = (y_i - \mu)^T\Sigma^{-1}(y_i - \mu)$ is in quadratic form and 
@@ -171,6 +171,50 @@ null when null is true) and high power is good; small deviations may be
 statistically significant when combined.
 \textbf{Limitations of MV Tests:} interpretations difficult without univariate
 tests when statistically significant MV test; \textbf{non-directional} so
-null hypothesis for MV is 2-tailed.
+null hypothesis for MV is 2-tailed.\\
+
+\textit{Handout 6:}
+\begin{itemize}
+    \item \textbf{Univariate Two-Sample T Test:} null and alt hypoth; t stat and 
+    pooled variance; assuming equal variances; validity of p-val is sampled from 
+    normal dist with equal var but possibly diff means
+    \item \textbf{Multivariate Two-Sample Hotelling's T Test:} null and alt; 
+    t stat (maha dist); pooled sample cov; validity pval is MV normal dist with 
+    equal cov matrices but diff means; yij is the jth obs in group i and vectors 
+    with p entries; individual t test to see where differences lie.
+    \item \textbf{Paired Multivariate Data:} Difference = Treatment - Control;
+    multivariate and paired (same subject); apply 1-sample Hotelling's T test; 
+    null is mean diff 0, alt is mean diff not 0; t stat is maha between d-bar 
+    and 0; validity is mv normal; follow up univariate analysis to see which 
+    dist from 0 is significant;
+\end{itemize}
+
+\textit{Handout 7:}
+\begin{itemize}
+    \item \textbf{Univariate 1-Way ANOVA:} yi. is sum across all measurements 
+    in sammple i, y-bari. is sample mean of all measurements in sample i, 
+    y-bar.. is (grand) sample mean of all measurements across all samples; 
+    statistical model for data, assume ...; null and alt; estimate of $\sigma^2$ 
+    using within variation MSE (within group); MSE thought of as pooled estimate 
+    of $\sigma^2$; between sample variation is MSH; F stat eq, explained var / 
+    unexplained var (within is noise and between is signal); Reject when F 
+    large; look at graphs, sd of within group (noise).
+    \item \textbf{1-Way MANOVA:} vector yij has yij1...yijp; statistical model 
+    with yi being estimate of mu; null and alt hypoth; between var is H eq, 
+    within var is E eq; E + H is total sample covariance; dets of each give 
+    generalized vars; Wilk's $\Lambda$ stat which is unexplained or noise / 
+    total; reject when $\Lambda$ is small; get F by transforming and and when 
+    large reject null. manova() then summary with Wilk's test, summary\$SS gives 
+    H and \$Residuals gives E; Follow up with univariate anovas to see which 
+    var has diff means across groups; TukeyHSD() with Bonferroni correction 
+    finds which groups are different, p adj is bumped up little so hard to 
+    reject null, protect from making type I error, compare p-vals to alpha /
+    num of vars to see which are significant, can compare sample means this way.
+\end{itemize}
+
+\textit{Handout 8:}
+\begin{itemize}
+    \item 
+\end{itemize}
 
 \end{document}
