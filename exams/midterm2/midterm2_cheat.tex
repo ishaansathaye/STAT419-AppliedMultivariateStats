@@ -28,7 +28,7 @@
     \thepage}}{Ishaan Sathaye
  {\hspace{.01in}}}{}}}
 
-\head{Midterm Exam Cheat Sheet}{STAT 419}
+\head{Midterm 2 Exam Cheat Sheet}{STAT 419}
 
 \begin{document}
  
@@ -41,7 +41,7 @@ func in R.
 \textbf{Matrix Multiplication:} $AB \neq BA$ in general; inner dimensions must
 match.
 \textbf{Distributive Property:} $A(B + C) = AB + AC$.
-\textbf{Transpose of Products:} $(AB)^T = B^TA^T$.\\
+\textbf{Transpose of Products:} $(AB)^T = B^TA^T$.
 
 \textit{Handout 2:}
 \textbf{Sum of elements:} $\sum_{i=1}^n a_i = j^Ta$ where $j$ is a vector of 1s.
@@ -85,8 +85,8 @@ for x, to make it length 1 divide by $\sqrt{2}$;
 \textbf{Eigen Properties:} eigenvalues of a PDM are all positive; eigenvectors 
 of a symmetric matrix are all orthogonal: $x_i^Tx_j = 0$ for $i \neq j$; 
 trace(A) = sum of eigenvalues; det(A) = product of eigenvalues; present 
-eigenvalues \textbf{in descending order}.\\
-
+eigenvalues \textbf{in descending order}.
+%Handout 5%
 \textit{Handout 3:}
 \textbf{Sample Mean Vector:} \texttt{colMeans()}; estimate of the population 
 mean vector.
@@ -100,8 +100,8 @@ lose to 0 is a weak linear assoc.
 it is more interpretable; sample corr coeff: $r_{jk} = \frac{s_{jk}}{
     \sqrt{s_{jj}}\sqrt{s_{kk}}}$ and same for population; \texttt{cor()} for
 correlation matrix, has 1 on diagonal, $\rho_{jk} = \rho_{kj}$, \textbf{between
--1 and 1 and no units};\\
-
+-1 and 1 and no units};
+%Handout 5%
 \textit{Handout 4:}
 \textbf{Linear Combination:} $z = c_1x_1 + c_2x_2$; $z = c^Tx$; 
 \textbf{Sample Mean :} Vector of z: $\bar{z} = c^T\bar{x}$. 
@@ -138,8 +138,8 @@ rank(A) = q $\leq$ p then $z \sim N_q(A\mu, A^T\Sigma A)$; if $\mu = 0$ and
 $\Sigma = I$ then $Ay \sim N(0, I)$.
 \textbf{Independent Random Variables:} $y_j$ and $y_k$ are independent if
 and only if covariance $s_{jk} = 0$ or stated in terms of correlation of row jk;
-\textbf{Implication goes both ways since property of MV normal distribution.} \\
-
+\textbf{Implication goes both ways since property of MV normal distribution.} 
+%Handout 5%
 \textit{Handout 5:}
 \textbf{Disprove p vars are jointly MV normally distributed is to show that 
 at least 1 y is not uni-variate normal.}; using qq-plot or rigorous tests; null
@@ -174,47 +174,162 @@ tests when statistically significant MV test; \textbf{non-directional} so
 null hypothesis for MV is 2-tailed.\\
 
 \textit{Handout 6:}
-\begin{itemize}
-    \item \textbf{Univariate Two-Sample T Test:} null and alt hypoth; t stat and 
-    pooled variance; assuming equal variances; validity of p-val is sampled from 
-    normal dist with equal var but possibly diff means
-    \item \textbf{Multivariate Two-Sample Hotelling's T Test:} null and alt; 
-    t stat (maha dist); pooled sample cov; validity pval is MV normal dist with 
-    equal cov matrices but diff means; yij is the jth obs in group i and vectors 
-    with p entries; individual t test to see where differences lie.
-    \item \textbf{Paired Multivariate Data:} Difference = Treatment - Control;
-    multivariate and paired (same subject); apply 1-sample Hotelling's T test; 
-    null is mean diff 0, alt is mean diff not 0; t stat is maha between d-bar 
-    and 0; validity is mv normal; follow up univariate analysis to see which 
-    dist from 0 is significant;
-\end{itemize}
+\textbf{Univariate 2-Sample t-Test:} $H_0$: $\mu_1 = \mu_2$; $H_a$: $\mu_1 
+\neq \mu_2, \mu_1 > \mu_2, \mu_1 < \mu_2$; $t = \frac{\bar{y}_1 - \bar{y}_2}
+{s_pl\sqrt{\frac{1}{n_1} + \frac{1}{n_2}}}$; $s_{pl}^2 = \frac{(n_1 - 1)s_1^2
++ (n_2 - 1)s_2^2}{n_1 + n_2 - 2}$; b/c \underline{assuming equal variances}; 
+validity of p-val: sampled from normal dist. but diff means.
+\textbf{MV 2-Sample Hotelling's T Test:} $H_0$: $\boldsymbol{\mu_1} =
+\boldsymbol{\mu_2}$; $H_a$: $\boldsymbol{\mu_1} \neq \boldsymbol{\mu_2}$; $T^2 
+= (\boldsymbol{\bar{y}_1} - \boldsymbol{\bar{y}_2})^T[S_pl(\frac{1}{n_1} +
+\frac{1}{n_2})]^{-1}(\boldsymbol{\bar{y}_1} - \boldsymbol{\bar{y}_2})$; is the 
+Maha. distance between mean vectors; $\boldsymbol{S_{pl}} = \frac{(n_1 - 1)
+\boldsymbol{S_1} + (n_2 - 1)\boldsymbol{S_2}}{n_1 + n_2 - 2}$; validity of p-val 
+is MV normal dist. with equal cov. matrices but diff. means; \underline{$y_ij$ 
+is the jth obs. in group i and vectors with p entries}; follow up with univariate
+t-tests to see where differences lie.
+\textbf{Paired MV Data:} Difference = Treatment - Control; MV and Paired (same
+subject); Apply 1-Sample Hotelling T Test; $H_0$: $\boldsymbol{\mu_d} = 0$; 
+$H_a$: $\boldsymbol{\mu_d} \neq 0$; $T^2 = 
+\boldsymbol{\bar{d}}^T[S_{d}(\frac{1}{n})]^{-1}\boldsymbol{\bar{d}}$; Maha. dist 
+between $\boldsymbol{\bar{d}}$ and 0; validity of p-val is MV normal dist. with
+$N_z(\boldsymbol{\mu_d}, \Sigma_d)$; follow up with univariate t-tests to see
+which dist. from 0 is significant.\\
 
 \textit{Handout 7:}
-\begin{itemize}
-    \item \textbf{Univariate 1-Way ANOVA:} yi. is sum across all measurements 
-    in sammple i, y-bari. is sample mean of all measurements in sample i, 
-    y-bar.. is (grand) sample mean of all measurements across all samples; 
-    statistical model for data, assume ...; null and alt; estimate of $\sigma^2$ 
-    using within variation MSE (within group); MSE thought of as pooled estimate 
-    of $\sigma^2$; between sample variation is MSH; F stat eq, explained var / 
-    unexplained var (within is noise and between is signal); Reject when F 
-    large; look at graphs, sd of within group (noise).
-    \item \textbf{1-Way MANOVA:} vector yij has yij1...yijp; statistical model 
-    with yi being estimate of mu; null and alt hypoth; between var is H eq, 
-    within var is E eq; E + H is total sample covariance; dets of each give 
-    generalized vars; Wilk's $\Lambda$ stat which is unexplained or noise / 
-    total; reject when $\Lambda$ is small; get F by transforming and and when 
-    large reject null. manova() then summary with Wilk's test, summary\$SS gives 
-    H and \$Residuals gives E; Follow up with univariate anovas to see which 
-    var has diff means across groups; TukeyHSD() with Bonferroni correction 
-    finds which groups are different, p adj is bumped up little so hard to 
-    reject null, protect from making type I error, compare p-vals to alpha /
-    num of vars to see which are significant, can compare sample means this way.
-\end{itemize}
+\textbf{Uni 1-Way ANOVA:} $y_i.$ = sum across all measurements in sample i, 
+$\bar{y}_i.$ = sample mean of all measurements in sample i, $\bar{y}_{..}$ =
+(grand) sample mean of all measurements across all samples; \underline{statistical
+model:} $y_{ij} = \mu_i + \alpha_i + \epsilon_{ij} = \mu_i + \epsilon_{ij}$, 
+where (1) is overall pop mean response, (2) effect on mean resp. due to pop i, 
+(3) population mean response for pop i, (4) random error assoc. with jth response 
+in pop i; \underline{assume:} (1) $\epsilon_{ij} \sim N(0, \sigma^2)$, (2) 
+$E(y_ij) = \mu_i$, (3) $Var(y_ij) = \sigma^2$; \underline{var equal}; $H_0$:
+$\mu_1 = \mu_2 = \ldots = \mu_k$; $H_a$: at least 1 $\mu_i \neq \mu_j$; 
+\underline{estimate of $\sigma^2$:} \textbf{within} $MSE = \frac{\Sigma_{i=1}^k
+\Sigma_{j=1}^{n_i}(y_{ij} - \bar{y}_i.)^2}{nk - k} = 
+\frac{SSE}{nk - k}$, thought of as pooled estimate of $\sigma^2$; \textbf{between}
+$MSH = n\frac{1}{k-1}\Sigma_{i=1}^k(\bar{y}_i. - \bar{y}_{..})^2 =
+\frac{SSH}{k-1}$, thought of as estimate of $\sigma^2$; $F = \frac{MSH}{MSE}$, 
+which is explained variation / unexp. variation (within is noise and between 
+is signal); reject when F is large, \underline{look at graphs, sd of within 
+group (noise)}.
+\textbf{1-Way MANOVA:} $y_{ij}$ is a vector of $y_{ij1}, \ldots, y_{ijp}$; 
+same stat model but with vectors and $y_i.$ estimate of $\mu$; $H_0$:
+$\boldsymbol{\mu_1 = \mu_2 = \ldots = \mu_k}$; $H_a$: all pops. do not have 
+the same mean vectors; \textbf{between} $H = n\Sigma_{i=1}^k(\boldsymbol{\bar{y}_i.}
+- \boldsymbol{\bar{y}_{..}})(\boldsymbol{\bar{y}_i.} - \boldsymbol{\bar{y}_{..}})^T$;
+\textbf{within} $E = \Sigma_{i=1}^k\Sigma_{j=1}^{n_i}(y_{ij} - \boldsymbol{\bar{y}_i.})
+(y_{ij} - \boldsymbol{\bar{y}_i.})^T$; $E + H$ is total sample covariance;
+Det() of each give generalized within/total variation: $\Lambda = \frac{|E|}{
+|E + H|}$; Wilk's $\Lambda$ stat which is noise / total; reject 
+when $\Lambda$ is small; Transform $\Lambda$ to F and when large reject; 
+\texttt{manova()} then \texttt{summary()} with "Wilks", \$SS gives H and 
+\$Residuals gives E; follow up with univariate ANOVAs to see which var has
+diff means across groups; \texttt{TukeyHSD()} with Bonferroni correction: which 
+\underline{groups} are different; p-adj bumped up to protect from Type I error; 
+\underline{compare p-vals to $\alpha / p$ to see which are significant}, compare 
+sample means this way.\\
 
 \textit{Handout 8:}
-\begin{itemize}
-    \item 
-\end{itemize}
+\textbf{MANOVA Test Statistics:} All functions of the eigenvalues of $E^{-1}H$, 
+$s = min(k-1, p)$ is the rank of it; Wilk's $\Lambda = $ $\prod_{i=1}^s 
+\frac{\lambda_i}{1 + \lambda_i}$, Roy's largest root $\frac{1}{1 + \lambda_1}$, 
+Pillai's $\sum_{i=1}^s \frac{1}{1 + \lambda_i}$ (for hetero in cov matrix), 
+Lawley-Hotelling $\sum_{i=1}^s \lambda_i$.
+\textbf{MANOVA Type 1 Error Rate:} As Corr between vars incr. type 1 error rate 
+remains below 0.05.
+\textbf{Profile Analysis on MANOVA:} $H_{01}$: k profiles are parallel (
+\underline{slope from var to var is same across groups:} $\mu_{12} - \mu_{11} =
+\mu_{22} - \mu_{21} = \dots$), $H_{02}$: k profiles are at the same level 
+(\underline{average of the mean elements are eq across groups (sums equal):}
+$\sum \mu_{1i} = \sum \mu_{2i} = \dots$) \textbf{offset in graph, sum of 
+endpoints with 2 lines}, $H_{03}$: k profiles are flat (\underline{p vars avgs 
+across groups are the same:} $\mu_{11} + \mu_{21} + \dots = \mu_{12} + 
+\mu_{22} + \dots$) \textbf{stacked points avgs are the same with 2 lines}; 
+\underline{start with a MANOVA}; Parallel Interp: moderate evidence that mean 
+weights change at different rate depending on treatment (reject), Levels Interp: 
+average of the mean weights may be the same across treatments (fail to reject), 
+Flat Interp: mean weights do change regardless of group (reject); Repeated 
+Measures Data: same experimental unit yields multiple observations (obsiv unit 
+not same as exp unit), use profile analysis and MANOVA for this data.
+
+\textit{Handout 9:}
+\textbf{Single Pop Cov Test:} $H_0$: $\Sigma = \Sigma_0$; $H_a$: $\Sigma \neq
+\Sigma_0$; \textbf{Test Stat:} $u = (n - 1)[ln|\Sigma_0| - ln|S| - tr(S
+\Sigma_0^{-1}) - p]$; S close to $\Sigma_0$ then logs are similar, $S\Sigma_0^{-1}
+\sim I$, so trace is p, so $u \sim 0$; reject when stat is large; \textbf{DF 
+for $X^2$ dist is the expected value}; Stat and P-val appropriate when n is 
+relatively large and follows MV dist. (Mardia test).
+\textbf{Several Pop. Cov Test:} need for Hotelling's (2-Sample) and MANOVA;
+$H_0$: $\Sigma_1 = \Sigma_2 = \dots = \Sigma_k$; $H_a$: all pop. do not have 
+same covariance matrix; \underline{Box M Test Conditions} are that k independent 
+samples of data and each k comes from MV dist $N(\mu_i, \Sigma_i)$; Handout 6 
+pooled sample cov eq but now for several pops is the weighted avg of sample cov. 
+matrices, weighting by sample size; $\Lambda$ is ration of det of $S_i$ to det 
+of $S_pl$, when 1 then lambda is around 1; Transform to M-test and reject when 
+M-stat is large; \textbf{DF is the expected value}.
+\textbf{Test for Indep. of P Vars:} $\Sigma$ is diagonal and 0 elsewhere means 
+p vars indep. of each other (can be $\Sigma_0$); $P_\rho$ is pop. corr. matrix 
+where diagonal are 1 and 0 elsewhere means p vars indep.; $H_0$: $P_\rho = I$;
+$H_a$: $P_\rho \neq I$; $|R|$ is det of sample corr. matrix and $|R| = 1$ if 
+indep. and 0 if dep., 0-1 measures degree of evidence for/against null; 
+$X^2 = -[(n-1) - \frac{2p + 5}{6}]ln|R|$ with df being $\frac{p(p-1)}{2}$ which 
+is the expected value.\\
+
+\textit{Handout 10:}
+\textbf{Discriminant Analysis:} follow up to MANOVA; MANOVA and Hotelling's can
+distinguish linear combos of vars across groups; \underline{maximally separate 
+z-bars of groups}; $z = a'y = [S_{pl}^-1(\bar{y}_1 - \bar{y}_2)]^T y$, where 
+$a'$ is a scalar; t test on z scores reveals significant differences.
+\textbf{Disc. Analysis on Several Pops.:} $E^{-1}H$ eigenvector or largest 
+eigenvalue is optimal disc. func. to maximally distinguish; handout 8 first line 
+gives number of funcs; \underline{s disc. funcs. define s indep vars that are 
+funcs. of original p vars.}; \textbf{Relative Importance Formula:} $\frac{
+\lambda_i}{\Sigma_{i=1}^s \lambda_i}$, how much variability you retain between
+groups; $\boldsymbol{\bar{z}}$ of each group is pushed as far as possible from 
+each other.\\
+
+\textit{Handout 11:}
+\textbf{Stand. Coeffs. of Disc. Funcs.:} \texttt{scale()} to get z scores to 
+compare relative importance of vars.
+\textbf{Stat. Signif. of Disc. Funcs.:} $\Lambda_m = \prod_{i=m}^s \frac{
+1}{1 + \lambda_i}$, $V_m = -[N - \frac{p + k + 1}{2}]ln(\Lambda_m)$, $V_m$ 
+transforms to F-stat with df = $(p-m+1)(k-m)$ as expected value; \underline{
+rejecting MANOVA tests whether at least first eigenvector provides significant
+dimension of separation}; conditions: MV normal and equal cov. matrices across 
+groups.
+\textbf{Stat. Sign. of Vars:} test if vars contribute sign. in group separation; 
+$\Lambda = \frac{\Lambda_p}{\Lambda_{p-1}}$ where top is all vars and bottom is 
+without var, useful if result is small (same if not useful); $F = \frac{1 - 
+\Lambda}{\Lambda} \frac{N - p - k + 1}{p + k - 1}$, large when var is useful, 
+reject null that var does not contribute to group separation; \underline{partial 
+F test:} compare p-vals with Bonferroni correction of $\alpha / p$.
+\textbf{Classification Trees:} want high node homo or low hetero; measure 
+node hetero using misclassification rates; \texttt{rpart()} with output as 
+\texttt{root, n, loss (misclassified), (Group1, \dots)}; large stretch in tree 
+means helpful in split.\\
+
+\textit{Handout 12:}
+\textbf{Fisher's Procedure:} after \texttt{lda() and predict()} compute 
+$\boldsymbol{\bar{z}}$ of all groups, \texttt{predict()} on new y to get z score, 
+find group using $D^2 = (z_1 - \bar{z_{i1}})^2 + (z_2 - \bar{z_{i2}})^2$.
+\textbf{Conf. Matrix:} \underline{accuracy:} prop of obs. that classified 
+correctly, misclass. rate is $1-A$; \underline{sensitivity:} prop of a given 
+class that is classified as that class; \underline{specificity:} prop of records 
+not of a given class that are not classified as that class (ex 98/100).
+\textbf{Linear Class Func:} \underline{assume groups have same cov. matrix};
+minimize Maha. distance foild to maximize $L_i(y) = \bar{y_i}^TS_{pl}^{-1}y - (1/2)
+\bar{y_i}^TS_{pl}^{-1}y_i$.
+\textbf{Quad Class Func:} same minimize Maha dist. but with indiv cov matrix 
+so less power (less data) b/c no assumption.
+\textbf{Steps on Analysis:} (1) Graphic and stats (2) mvn test (3) BoxM test
+for equal cov matrices across groups (4) standardize for disc analysis (5)
+lda() confusion matrix (6) qda() conf matrix.
+\textbf{LOO CV:} Fisher/QDA not good on new data; Training and Testing Set; 
+CV by omit 1st and do lda on rest, but use model on all data and CV as honest 
+estimator of how well model does; \underline{Interp:} using CV estimates of 
+accuracy/misc rates, sens, spec, one method does a bit better than the other; 
+after CV use model for all predictions (not CV).
 
 \end{document}
