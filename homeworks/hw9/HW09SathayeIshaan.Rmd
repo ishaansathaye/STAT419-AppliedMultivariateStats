@@ -1,0 +1,162 @@
+# Homework 9: Tuesday Exercises
+
+Ishaan Sathaye
+
+## Question 2
+
+```{r, message=FALSE}
+library(MVN)
+library(car)
+library(CCA)
+library(GGally)
+```
+
+### Part (a)
+
+**Perform a multivariate multiple linear regression on this data and perform a test of overall regression. Follow up with univariate multiple linear regression models if appropriate**
+
+```{r}
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+wine <- read.table(file="../../data/T7_1_SEISHU.DAT", 
+                   col.names = c("taste", "odor", "pH","acidity1", "acidity2", "sake_meter",
+                                 "direct_reducing_sugar", "total_sugar", "alcohol",
+                                 "formyl_nitrogen"))
+head(wine, n=5)
+tail(wine, n=5)
+```
+
+Multivariate Multiple Linear Regression:
+
+```{r}
+fit.wine <- lm(cbind(taste, odor) ~ pH + acidity1 + acidity2 + sake_meter + direct_reducing_sugar + total_sugar + alcohol + formyl_nitrogen, data = wine)
+fit.wine
+```
+
+Test of Overall Regression:
+
+$H_0:$ no linear association between any of the **x**'s and any of the **y**'s.
+
+$H_a:$ there is a linear association between at least one of the **x**'s and at least one of the **y**'s.
+
+```{r}
+linearHypothesis(fit.wine, hypothesis.matrix = c("pH = 0","acidity1 = 0", "acidity2 = 0",
+                                                 "sake_meter = 0", 
+                                                 "direct_reducing_sugar = 0", 
+                                                 "total_sugar = 0", "alcohol = 0",
+                                                 "formyl_nitrogen = 0"))
+```
+
+There is a lot of unexplained variation. Regression model does not explain a significant amount. We do not have sufficient evidence to conclude that there is no linear association between the **x**'s and the **y**'s, since the p-value is very large (p-val = 0.33210). No need for follow up univariate linear regression models since they will not be significant.
+
+### Part (b)
+
+**Check whether the residuals follow the distribution that they should follow in order for the p-value(s) you used above to be trustworthy.**
+
+```{r}
+mvn(data=fit.wine$residuals, subset=NULL, mvnTest="mardia", desc=F)
+```
+
+By the Mardia test for multivariate normality above, the residuals follow a multivariate normal distribution. By the Mardia Skewness test and the p value being large there is no violation of skewness or significant skewness. By the Mardia Kurtosis test an the p-value being large there is no significant kurtosis or "tailedness". Therefore, p-value from the test of overall regression is trustworthy and valid.
+
+### Part (c)
+
+**Plot the residuals of one of the response variables versus the fitted values of the response variable; repeat for the other response variable. What does this indicate to you?**
+
+```{r}
+par(mfrow=c(1,2))
+plot(fit.wine$fitted.values[,1], fit.wine$residuals[,1], xlab="Fitted Values", ylab="Residuals", main="Taste")
+abline(h=0, col="red")
+plot(fit.wine$fitted.values[,2], fit.wine$residuals[,2], xlab="Fitted Values", ylab="Residuals", main="Odor")
+abline(h=0, col="red")
+
+```
+
+From these plots, is is an indication that the assumptions of the multivariate linear regression model are met. For each of the plots, there does not seem to be any pattern or trend and the residuals are randomly scattered around zero. There is equal variance and independence since no clear pattern. Since these assumptions are met, it would mean that we can also again trust the p-value from above.
+
+# Homework 9: Thursday Exercises
+
+## Question 1: #11.8
+
+```{r}
+gluc <- read.table(file="../../data/T3_4_DIABETES.DAT", 
+                   col.names = c("Patient Number", "relative_weight", "fasting_plasma_glucose","glucose_intol", "insulin_resp_to_oral_gluc",
+                                 "insulin_resistance"))
+head(gluc, n=5)
+tail(gluc, n=5)
+```
+
+#### (a) Find the canonical correlations between $(y_1, y_2)$ and $(x_1, x_2, x_3)$.
+
+```{r}
+glucCC <- cc(Y = as.matrix(gluc[,2:3]), X = as.matrix(gluc[,4:6]))
+glucCC$cor
+```
+
+$r_1 = 0.5142$ and $r_2 = 0.125$
+
+#### (b) Find the standardized coefficients for the canonical variates.
+
+-   To get standardized coefficients for the canonical variates, do the same thing that was needed to get standardized discriminant functions. What do you think the point of getting standardized coefficients of the canonical variates? Interpret your results with complete sentences.
+
+```{r}
+glucStd <- scale(gluc[,-1])
+glucStd <- data.frame(glucStd)
+head(glucStd)
+```
+
+```{r}
+glucStdCC <- cc(Y = as.matrix(glucStd[,1:2]), X = as.matrix(glucStd[,3:5]))
+glucStdCC$xcoef
+glucStdCC$ycoef
+```
+
+$a_1 = \begin{bmatrix} -1.02 \\ 0.16 \end{bmatrix}$ and $a_2 = \begin{bmatrix} -0.048 \\ 1.009 \end{bmatrix}$
+
+$b_1 = \begin{bmatrix} -0.436 \\ 0.704 \\ -1.081 \end{bmatrix}$ and $b_1 = \begin{bmatrix} 0.823 \\ -0.455 \\ -0.401 \end{bmatrix}$
+
+The point of getting standardized coefficients of the canonical variates is to be able to now gauge the relative contribution of each original variable to the new canonical variates or dimensions. Basically, we can now compare how strongly each original variable is associated with each canonical variate. From these results it would seem that insulin resistance as well as relative weight have the largest negative coefficients which would mean a strong negative association with the first canonical variate. For the second canonical variate, fasting plasma glucose has the largest positive coefficient, which would mean a strong positive association with this variate.
+
+#### (c) Test the significance of each canonical correlation.
+
+-   To get the tests of significance, you will need to read up on the details of this in the book. I have faith in you! You may do some computations outside of *R* if that is easier for you, but you may also do all computations inside the *R* environment. Interpret your results.
+
+Test of Significance for $r_1 = 0.5142$:
+
+```{r}
+fit.gluc <- lm(cbind(relative_weight, fasting_plasma_glucose) ~ glucose_intol + insulin_resp_to_oral_gluc + insulin_resistance, data = gluc)
+linearHypothesis(fit.gluc, hypothesis.matrix = c("glucose_intol = 0","insulin_resp_to_oral_gluc = 0", "insulin_resistance = 0"))
+```
+
+Reject the null that there is no linear association between any of the x's and any of the y's. There is fairly strong evidence of a linear association between the response variables of relative weight and fasting plasma glucose and the explanatory variables of glucose intolerance, insulin response to oral glucose, and insulin resistance (p-value = 0.035).
+
+Test of Significance for $r_2 = 0.125$:
+
+```{r}
+lam2 <- (1 - 0.125^2)
+p <- 3
+q <- 2
+k <- 2
+n <- nrow(gluc)
+x2 <- -(n - (1/2)*(p+q+3))*log(lam2)
+chidf <- (p - k + 1)*(q - k + 1)
+1-pchisq(x2, df=chidf)
+```
+
+We fail to reject the null that there is no linear association between any of the x's and any of the y's. We do not have sufficient evidence that there is a linear association between the response variables of relative weight and fasting plasma glucose and the explanatory variables of glucose intolerance, insulin response to oral glucose, and insulin resistance (p-value = 0.718).
+
+-   Make a scatterplot matrix of the original data; and compute all bivariate correlation coefficients. Also make two scatterplots for both pairs of canonical variates. Discuss in relation to the various correlation coefficients that you have computed.
+
+```{r}
+ggpairs(gluc[,-1])
+
+```
+
+```{r}
+par(mfrow=c(1,2))
+plot(glucCC$scores$xscores[,1], glucCC$scores$yscores[,1], xlab="Canonical Variate 1 (x)", ylab="Canonical Variate 1 (y)", main="Scatterplot of First Canonical Variates")
+plot(glucCC$scores$xscores[,2], glucCC$scores$yscores[,2], xlab="Canonical Variate 2 (x)", ylab="Canonical Variate 2 (y)", main="Scatterplot of Second Canonical Variates")
+
+
+```
+
+From the bivariate relationship graph, we can see that the max correlation between any pair of a y and of an x is 0.507. This is for insulin resistance and insulin_resp_to_oral_glucose. From the correlation coefficients for the first canonical variate pair, there is a moderately positive linear relationship seen in the plot which aligns with the coefficients in the first column. Variables in the first plot had large coefficients which would result in a stronger linear relationship. From the second canonical variate pair plot there is a lack of a clear linear pattern and it has mixed signs of the coefficients from the second column. Because of this lack of pattern it could explain the more scattered and nonlinear relationship that is observed in the plot.
